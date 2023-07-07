@@ -1,6 +1,7 @@
 import sys
 
 class Graph:
+
     def __init__(self, vertices):
         self.V = vertices
         self.graph = [[0 for _ in range(vertices)] for _ in range(vertices)]
@@ -42,7 +43,7 @@ class Graph:
 
 
 # Accepting user input
-n = int(input("Enter the number of thermal power stations: "))
+n = int(input("Enter the number of thermal power stations:"))
 g = Graph(n)
 
 print("Enter the cost of electrification for each connection:")
@@ -53,3 +54,4 @@ for i in range(n):
 
 # Compute and display the minimum cost connection
 g.prim_mst()    
+
