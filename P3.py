@@ -1,83 +1,56 @@
-import heapq
+import sys
 
-def dijkstra(graph, start):
-    distances = {node: float('inf') for node in graph}
-    distances[start] = 0
-    heap = [(0, start)]
+class Graph:
+    def __init__(self, vertices):
+        self.V = vertices
+        self.graph = [[0 for _ in range(vertices)] for _ in range(vertices)]
 
-    while heap:
-        current_dist, current_node = heapq.heappop(heap)
-        if current_dist > distances[current_node]:
-            continue
-        for neighbor, weight in graph[current_node].items():
-            distance = current_dist + weight
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance 
-                heapq.heappush(heap, (distance, neighbor))
+    def add_edge(self, u, v, weight):
+        self.graph[u][v] = weight
+        self.graph[v][u] = weight
 
-    return distances
+    def print_mst(self, parent):
+        print("Thermal Station   --   Connected to   -->   Thermal Station   Cost")
+        for i in range(1, self.V):
+            print(f"   {i}                    --                    {parent[i]}                 {self.graph[i][parent[i]]}")
 
-def find_optimal_route(graph, start, destination):
-    distances = dijkstra(graph, start)
-    if distances[destination] == float('inf'):
-        return None
-    route = []
-    node = destination
+    def prim_mst(self):
+        key = [sys.maxsize] * self.V
+        parent = [None] * self.V
+        key[0] = 0
+        mst_set = [False] * self.V
 
-    while node != start:
-        route.append(node)
-        neighbors = graph[node]
-        min_distance = float('inf')
-        next_node = None
-        for neighbor, weight in neighbors.items():
-            if distances[neighbor] + weight == distances[node] and distances[neighbor] < min_distance:
-                min_distance = distances[neighbor]
-                next_node = neighbor
-        if next_node is None or next_node in route:
-            return None
-        node = next_node
+        parent[0] = -1
 
-    route.append(start)
-    route.reverse()
-    return route
+        for _ in range(self.V):
+            min_key = sys.maxsize
+            min_index = 0
 
-# Get user input for the graph
-graph = {}
-num_edges = int(input("Enter the number of edges in the graph: "))
-print("Enter the edges in the format 'node1 node2 weight':")
-for _ in range(num_edges):
-    edge = input().split()
-    node1, node2, weight = edge[0], edge[1], int(edge[2])
-    if node1 not in graph:
-        graph[node1] = {}
-    if node2 not in graph:
-        graph[node2] = {}
-    graph[node1][node2] = weight
-    graph[node2][node1] = weight
+            for v in range(self.V):
+                if key[v] < min_key and not mst_set[v]:
+                    min_key = key[v]
+                    min_index = v
 
-# Get user input for the start and destination nodes
-start_node = input("Enter the start node: ")
-destination_node = input("Enter the destination node: ")
+            mst_set[min_index] = True
 
-# Find the optimal route
-route = find_optimal_route(graph, start_node, destination_node)
+            for v in range(self.V):
+              if self.graph[min_index][v] > 0 and not mst_set[v] and self.graph[min_index][v] < key[v]:
+                    key[v] = self.graph[min_index][v]
+                    parent[v] = min_index
 
-# Print the result
-if route is None:
-    print("No route found.")
-else:
-    print("Optimal route:", route)
-'''
-Enter the number of edges in the graph: 7
-Enter the edges in the format 'node1 node2 weight':
-A B 3
-B C 9
-C E 6
-D E 4
-A D 7
-B D 2
-C D 5
-Enter the start node: A
-Enter the destination node: E
-Optimal route: ['A', 'B', 'D', 'E']
-'''
+        self.print_mst(parent)
+
+
+# Accepting user input
+n = int(input("Enter the number of thermal power stations: "))
+g = Graph(n)
+
+print("Enter the cost of electrification for each connection:")
+for i in range(n):
+    for j in range(i+1, n):
+        cost = int(input(f"Enter the cost between thermal station {i} and {j}: "))
+        g.add_edge(i, j, cost)
+
+# Compute and display the minimum cost connection
+g.prim_mst()    
+
